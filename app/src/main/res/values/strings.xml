@@ -1,0 +1,8 @@
+<resources>
+    <string name="app_name">TestEstafeta</string>
+    <string name="action_settings">Settings</string>
+    <string name="etEmpty">Enter any word to search images!</string>
+    <string name="ok">Ok</string>
+    <string name="nullResp">Response = null!</string>
+    <string name="noImagesFound">No images found!</string>
+</resources>
