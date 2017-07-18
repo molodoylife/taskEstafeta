@@ -5,4 +5,9 @@
     <string name="ok">Ok</string>
     <string name="nullResp">Response = null!</string>
     <string name="noImagesFound">No images found!</string>
+    <string name="turnOnGPS">Turn on GPS for a more accurate location!</string>
+    <string name="noInternetConnection">No Internet connection!</string>
+    <string name="noLocationEnabled">Enable location in settings!</string>
+    <string name="serverNotResponding">Check Internet connection!</string>
+    <string name="imagesDownloaded">Images has been downloaded in Estafeta folder</string>
 </resources>

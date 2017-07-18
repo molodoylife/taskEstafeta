@@ -4,13 +4,14 @@ package ua.hanasaka.testestafeta.presenter;
 import ua.hanasaka.testestafeta.model.data.Img;
 
 /**
- * Created by Oleksandr Molodykh on 17.07.2017.
+ * Define interface for presenter
  */
-
 public interface Presenter {
+    void initMainComponents();
+
     void onSearch();
 
-    void onStop();
-
     void onReceiveData (Img img);
+
+    void onGetError(String error);
 }

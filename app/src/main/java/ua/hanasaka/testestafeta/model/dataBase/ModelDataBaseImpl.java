@@ -1,24 +1,29 @@
-package ua.hanasaka.testestafeta.model;
+package ua.hanasaka.testestafeta.model.dataBase;
 
 import android.location.Location;
-import android.util.Log;
 
 import io.realm.Realm;
 import ua.hanasaka.testestafeta.model.data.Image;
 import ua.hanasaka.testestafeta.model.data.ImageDB;
+import ua.hanasaka.testestafeta.presenter.Presenter;
 
 /**
- * Created by Oleksandr Molodykh on 18.07.2017.
+ * Implementing DataBaseModel interface
+ * Saving data to Realm database
  */
-
-public class DataBaseSaver {
+public class ModelDataBaseImpl implements ModelDataBase{
     private final Location location;
-    String TAG = "logs";
+    private final Presenter presenter;
 
-    public DataBaseSaver(Location loc) {
+    public ModelDataBaseImpl(Location loc, Presenter presenter) {
         location = loc;
+        this.presenter = presenter;
     }
 
+    /**
+     * @param image
+     * Save Image to Realm db
+     */
     public void saveToDb(Image image){
         try{
             ImageDB imageDB = new ImageDB();
@@ -33,9 +38,8 @@ public class DataBaseSaver {
             realm.copyToRealm(imageDB);
             realm.commitTransaction();
 
-            Log.d(TAG, "data saved to db!");
         } catch (Exception e){
-            Log.d(TAG, e.getClass() + " mess=" + e.getMessage());
+            presenter.onGetError(e.getClass()+" mess "+e.getMessage());
         }
     }
 }

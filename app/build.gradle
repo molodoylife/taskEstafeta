@@ -13,7 +13,7 @@ android {
     }
     buildTypes {
         release {
-            minifyEnabled false
+            minifyEnabled true
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
     }
@@ -35,4 +35,6 @@ dependencies {
     compile 'com.squareup.picasso:picasso:2.5.2'
     compile 'it.sephiroth.android.exif:library:+'
     compile 'io.realm:realm-android:0.87.4'
+    testCompile 'org.mockito:mockito-core:2.7.22'
+    androidTestCompile 'org.mockito:mockito-android:2.7.22'
 }

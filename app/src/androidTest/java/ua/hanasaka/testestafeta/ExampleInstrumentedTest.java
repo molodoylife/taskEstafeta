@@ -1,41 +1,61 @@
 package ua.hanasaka.testestafeta;
 
-import android.content.Context;
 import android.support.test.InstrumentationRegistry;
 import android.support.test.runner.AndroidJUnit4;
 import android.util.Log;
 
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
-import retrofit2.Call;
-import retrofit2.Callback;
-import retrofit2.Response;
-import ua.hanasaka.testestafeta.model.Model;
-import ua.hanasaka.testestafeta.model.ModelImpl;
-import ua.hanasaka.testestafeta.model.api.ApiInterface;
-import ua.hanasaka.testestafeta.model.api.ApiModule;
-import ua.hanasaka.testestafeta.model.data.Img;
+import io.realm.Realm;
+import io.realm.RealmConfiguration;
+import io.realm.RealmResults;
+import ua.hanasaka.testestafeta.model.data.ImageDB;
+import ua.hanasaka.testestafeta.utils.InternetChecker;
+import ua.hanasaka.testestafeta.utils.LocationChecker;
+import ua.hanasaka.testestafeta.utils.LogTagsHolder;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 
-/**
- * Instrumentation test, which will execute on an Android device.
- *
- * @see <a href="http://d.android.com/tools/testing">Testing documentation</a>
- */
 @RunWith(AndroidJUnit4.class)
 public class ExampleInstrumentedTest {
-    String TAG = "log";
 
-    @Ignore
+
     @Test
-    public void useAppContext() throws Exception {
-        // Context of the app under test.
-        Context appContext = InstrumentationRegistry.getTargetContext();
-        assertEquals("ua.hanasaka.testestafeta", appContext.getPackageName());
+    public void checkRealmData() throws Exception {
+
+        RealmConfiguration config = new RealmConfiguration.Builder(InstrumentationRegistry.getTargetContext())
+                .name("mydb.realm")
+                .deleteRealmIfMigrationNeeded()
+                .schemaVersion(1)
+                .build();
+        Realm.setDefaultConfiguration(config);
+
+        Realm realm = Realm.getDefaultInstance();
+
+        RealmResults<ImageDB> images = realm.where(ImageDB.class)
+                .findAll();
+
+        assertNotNull(images);
+
+        for (ImageDB image : images) {
+            assertNotNull(image.getTitle());
+            assertNotNull(image.getDate());
+            assertNotNull(image.getUrl());
+            assertNotNull(image.getLat());
+            assertNotNull(image.getLon());
+            Log.d(LogTagsHolder.TAG, image.getTitle() + " " + image.getDate());
+        }
     }
 
+    @Test
+    public void isInternetConnectionPresent() throws Exception {
+        assertTrue(InternetChecker.isInternetAvailable(InstrumentationRegistry.getTargetContext()));
+    }
 
+    @Test
+    public void isLocationEnabled() throws  Exception {
+        assertTrue(LocationChecker.isLocationEnabled(InstrumentationRegistry.getTargetContext()));
+    }
 }

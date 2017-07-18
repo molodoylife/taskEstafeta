@@ -7,13 +7,12 @@ import java.util.List;
 import ua.hanasaka.testestafeta.model.data.Image;
 
 /**
- * Created by Oleksandr Molodykh on 17.07.2017.
+ * Define interface for View
  */
-
 public interface View {
     void showData(List<Image> list);
 
-    void showError(String error);
+    void showMess(String error);
 
     void showEmptyList();
 

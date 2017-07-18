@@ -2,10 +2,12 @@ package ua.hanasaka.testestafeta.view;
 
 import android.content.Context;
 import android.content.CursorLoader;
+import android.content.DialogInterface;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
 import android.provider.MediaStore;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -29,12 +31,20 @@ import ua.hanasaka.testestafeta.presenter.Presenter;
 import ua.hanasaka.testestafeta.view.adapter.RecyclerViewAdapter;
 
 
+/**
+ * MainActivity class. Implements View interface
+ */
 public class MainActivity extends AppCompatActivity implements ua.hanasaka.testestafeta.view.View {
 
-    private static final String TAG = "log";
+    /**
+     * EditText for entering search words
+     */
     @BindView(R.id.etSearch)
     EditText etSearch;
 
+    /**
+     * RecyclerView for displaying images fromInternet
+     */
     @BindView(R.id.recyclerView)
     RecyclerView recyclerView;
 
@@ -46,36 +56,57 @@ public class MainActivity extends AppCompatActivity implements ua.hanasaka.teste
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         ButterKnife.bind(this);
+
+        //Setting LLManager and RecyclerViewAdapter to RecyclerView
         LinearLayoutManager llm = new LinearLayoutManager(this);
         recyclerView.setLayoutManager(llm);
         adapter = new RecyclerViewAdapter();
         recyclerView.setAdapter(adapter);
+
+        //Getting instance of presenter
         presenter = new ImageListPresenter(this);
+        presenter.initMainComponents();
 
-
-        RealmConfiguration config = new RealmConfiguration.Builder(this)
-                .name("mydb.realm")
-                .deleteRealmIfMigrationNeeded()
-                .schemaVersion(1)
-                .build();
-        Realm.setDefaultConfiguration(config);
-
+        //Presenter onSearch() will fire only if word to search not empty and not cyrillic
         etSearch.setOnKeyListener(new View.OnKeyListener() {
             public boolean onKey(View v, int keyCode, KeyEvent event) {
                 if (event.getAction() == KeyEvent.ACTION_DOWN) {
                     switch (keyCode) {
                         case KeyEvent.KEYCODE_ENTER:
+
+
                             if (etSearch.getText().toString().equals("")) {
-                                Log.d(TAG, "word=" + getResources().getString(R.string.etEmpty));
+                                InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
+                                imm.hideSoftInputFromWindow(getCurrentFocus().getWindowToken(), InputMethodManager.HIDE_NOT_ALWAYS);
                                 Toast.makeText(MainActivity.this, getResources().getString(R.string.etEmpty), Toast.LENGTH_SHORT).show();
                                 return false;
                             } else {
-                                InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
-                                imm.hideSoftInputFromWindow(getCurrentFocus().getWindowToken(), InputMethodManager.HIDE_NOT_ALWAYS);
-                                clear();
-                                presenter.onSearch();
+
+
+                                //checking if word to search contains cyrillic symbols
+                                boolean isStringCyrillic = false;
+                                for (int i = 0; i < etSearch.getText().toString().length(); i++) {
+                                    if (Character.UnicodeBlock.of(etSearch.getText().toString()
+                                            .charAt(i)).equals(Character.UnicodeBlock.CYRILLIC)) {
+                                        isStringCyrillic = true;
+                                        break;
+                                    }
+                                }
+                                if (isStringCyrillic) {
+                                    InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
+                                    imm.hideSoftInputFromWindow(getCurrentFocus().getWindowToken(), InputMethodManager.HIDE_NOT_ALWAYS);
+                                    Toast.makeText(MainActivity.this, "Enter English word please!", Toast.LENGTH_SHORT).show();
+                                    return false;
+                                } else {
+                                    InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
+                                    imm.hideSoftInputFromWindow(getCurrentFocus().getWindowToken(), InputMethodManager.HIDE_NOT_ALWAYS);
+                                    clear();
+
+                                    //start presenter work
+                                    presenter.onSearch();
+                                    return true;
+                                }
                             }
-                            return true;
                         default:
                             break;
                     }
@@ -86,20 +117,30 @@ public class MainActivity extends AppCompatActivity implements ua.hanasaka.teste
 
     }
 
+    /**
+     * @param list
+     * Transfer list of results to adapter
+     */
     @Override
     public void showData(List<Image> list) {
         adapter.setImageList(list);
     }
 
     @Override
-    public void showError(String error) {
-
+    public void showMess(String error) {
+        Toast.makeText(this, error, Toast.LENGTH_SHORT).show();
     }
 
+    /**
+     * Clearing RecyclerView
+     */
     public void clear() {
         recyclerView.removeAllViewsInLayout();
     }
 
+    /**
+     * If no results to display
+     */
     @Override
     public void showEmptyList() {
         clear();
@@ -114,14 +155,5 @@ public class MainActivity extends AppCompatActivity implements ua.hanasaka.teste
     @Override
     public Context getContext() {
         return this;
-    }
-
-    private String getRealPath(Uri contentUri) {
-        String[] proj = { MediaStore.Images.Media.DATA };
-        CursorLoader loader = new CursorLoader(this, contentUri, proj, null, null, null);
-        Cursor cursor = loader.loadInBackground();
-        int column_index = cursor.getColumnIndexOrThrow(MediaStore.Images.Media.DATA);
-        cursor.moveToFirst();
-        return cursor.getString(column_index);
     }
 }
